@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Material Sensory Quiz</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f7f7f7;
+      color: #333;
+    }
+    .container {
+      max-width: 600px;
+      margin: auto;
+      padding: 20px;
+    }
+    .section {
+      display: none;
+    }
+    .active {
+      display: block;
+    }
+    .intro, .question, .result {
+      background: white;
+      border-radius: 12px;
+      padding: 30px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    button {
+      background-color: #5c6ac4;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      font-size: 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 20px;
+    }
+    button:hover {
+      background-color: #4753a2;
+    }
+    .options label {
+      display: block;
+      background: #eee;
+      padding: 10px;
+      margin-top: 10px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .options input {
+      margin-right: 10px;
+    }
+    .progress {
+      margin: 20px 0;
+      font-size: 14px;
+    }
+    .navigation {
+      margin-top: 20px;
+    }
+    .navigation button {
+      margin-right: 10px;
+    }
+    .badge-placeholder {
+      height: 100px;
+      background: #e0e0e0;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-style: italic;
+      color: #777;
+      margin: 20px 0;
+    }
+    .share-buttons button {
+      margin-right: 10px;
+      background-color: #007bff;
+    }
+    img {
+      width: 100%;
+      border-radius: 8px;
+      margin: 15px 0;
+    }
+    @media (max-width: 600px) {
+      .intro, .question, .result {
+        padding: 20px;
+      }
+      h2, h3 {
+        font-size: 20px;
+      }
+      button {
+        font-size: 14px;
+        padding: 10px 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <!-- Intro -->
+  <div class="section intro active" id="intro">
+    <h2>Welcome to the Material Sensory Quiz</h2>
+    <p>This short quiz tests your knowledge of premium materials and their sensory properties used in interior design.</p>
+    <button onclick="startQuiz()">Begin Quiz</button>
+  </div>
+
+  <!-- Question -->
+  <div class="section question" id="question">
+    <h3 id="question-text"></h3>
+    <img id="question-image" src="" alt="" width="150px" height="150px">
+    <div class="options" id="options"></div>
+    <div class="progress" id="progress"></div>
+    <div class="navigation">
+      <button onclick="prevQuestion()" id="prevBtn">Back</button>
+      <button onclick="nextQuestion()">Next</button>
+    </div>
+  </div>
+
+  <!-- Result -->
+  <div class="section result" id="result">
+    <h2>Quiz Complete!</h2>
+    <p>Your Score: <strong id="scoreText"></strong>/5</p>
+    <div class="badge-placeholder">[ Sensory Expertise Badge Placeholder ]</div>
+    <p>Share your result:</p>
+    <div class="share-buttons">
+      <button onclick="copyLink()">Copy Link</button>
+      <button onclick="alert('Shared on Facebook')">Share on Facebook</button>
+      <button onclick="alert('Shared on WhatsApp')">Share on WhatsApp</button>
+    </div>
+    <button onclick="goToIntro()">Take Again</button>
+  </div>
+</div>
+
+<script>
+  const questions = [
+    {
+      text: "What best describes the tactile feel of Carrara Marble?",
+      image: "./images/download.jfif" ,
+      options: ["Warm and soft", "Cool and smooth", "Rough and textured", "Dry and fibrous"],
+      correct: "Cool and smooth"
+    },
+    {
+      text: "Brushed Brass feels...",
+      image: "/images/download (1).jfif",
+      options: ["Glossy and slippery", "Warm and metallic", "Soft and pliable", "Brittle and chalky"],
+      correct: "Warm and metallic"
+    },
+    {
+      text: "Mohair Velvet has what kind of touch?",
+      image: "/images/download (2).jfif",
+      options: ["Smooth and cold", "Coarse and itchy", "Soft and plush", "Dry and rigid"],
+      correct: "Soft and plush"
+    },
+    {
+      text: "Acoustic behavior of cork panels?",
+      image: "/images/download (3).jfif",
+      options: ["Reflects sound", "Amplifies noise", "Absorbs sound", "Creates echo"],
+      correct: "Absorbs sound"
+    },
+    {
+      text: "What texture does raw concrete have?",
+      image: "/images/download (4).jfif",
+      options: ["Fluffy and airy", "Rough and gritty", "Glossy and soft", "Sticky and wet"],
+      correct: "Rough and gritty"
+    }
+  ];
+
+  let currentQuestion = 0;
+  let userAnswers = [];
+
+  function startQuiz() {
+    currentQuestion = 0;
+    userAnswers = [];
+    showQuestion();
+    document.getElementById('intro').classList.remove('active');
+    document.getElementById('result').classList.remove('active');
+    document.getElementById('question').classList.add('active');
+  }
+
+  function showQuestion() {
+    const q = questions[currentQuestion];
+    document.getElementById("question-text").textContent = q.text;
+    document.getElementById("question-image").src = q.image;
+    document.getElementById("progress").textContent = `Question ${currentQuestion + 1} of ${questions.length}`;
+    
+    const optionsDiv = document.getElementById("options");
+    optionsDiv.innerHTML = "";
+    q.options.forEach(option => {
+      const label = document.createElement("label");
+      const input = document.createElement("input");
+      input.type = "radio";
+      input.name = "q" + currentQuestion;
+      input.value = option;
+      if (userAnswers[currentQuestion] === option) input.checked = true;
+      label.appendChild(input);
+      label.append(option);
+      optionsDiv.appendChild(label);
+    });
+
+    document.getElementById("prevBtn").style.display = currentQuestion === 0 ? "none" : "inline-block";
+  }
+
+  function nextQuestion() {
+    const selected = document.querySelector(`input[name="q${currentQuestion}"]:checked`);
+    if (!selected) {
+      alert("Please select an answer before continuing.");
+      return;
+    }
+
+    userAnswers[currentQuestion] = selected.value;
+
+    if (currentQuestion < questions.length - 1) {
+      currentQuestion++;
+      showQuestion();
+    } else {
+      showResult();
+    }
+  }
+
+  function prevQuestion() {
+    if (currentQuestion > 0) {
+      currentQuestion--;
+      showQuestion();
+    }
+  }
+
+  function showResult() {
+    let score = 0;
+    userAnswers.forEach((answer, i) => {
+      if (answer === questions[i].correct) score++;
+    });
+    document.getElementById("scoreText").textContent = score;
+    document.getElementById('question').classList.remove('active');
+    document.getElementById('result').classList.add('active');
+  }
+
+  function goToIntro() {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.getElementById('intro').classList.add('active');
+  }
+
+  function copyLink() {
+    navigator.clipboard.writeText(window.location.href).then(() => {
+      alert("Link copied to clipboard!");
+    });
+  }
+</script>
+
+</body>
+</html>
